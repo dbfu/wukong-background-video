@@ -4,10 +4,11 @@
 	"description": "显示黑神话悟空视频",
 	"publisher": "dbfu321",
 	"repository": "https://github.com/dbfu/wukong-background-video.git",
-	"version": "0.0.1",
+	"version": "0.0.5",
 	"engines": {
 		"vscode": "^1.10.5"
 	},
+	"icon": "video.png",
 	"categories": [
 		"Other"
 	],
@@ -22,22 +23,32 @@
 				"title": "background-video.uninstall"
 			}
 		],
-		"configuration": [{
-			"title": "background-video",
-			"properties": {
-				"background-video.opacity": {
-					"type": "number",
-					"default" : 0.4,
-					"description": "透明度"
-				},
-				"background-video.videoName": {
-					"type": "string",
-					"default" : "video1.mp4",
-					"description": "视频文件名",
-					"enum": ["video1.mp4", "video2.mp4"]
+		"configuration": [
+			{
+				"title": "background-video",
+				"properties": {
+					"background-video.opacity": {
+						"type": "number",
+						"default": 0.4,
+						"description": "透明度"
+					},
+					"background-video.videoName": {
+						"type": "string",
+						"default": "video1.mp4",
+						"description": "视频文件名",
+						"enum": [
+							"随机",
+							"video1.mp4",
+							"video2.mp4",
+							"video3.mp4",
+							"video4.mp4",
+							"video5.mp4",
+							"video6.mp4"
+						]
+					}
 				}
 			}
-		}]
+		]
 	},
 	"scripts": {
 		"lint": "eslint .",

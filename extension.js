@@ -3,7 +3,7 @@
 const vscode = require('vscode');
 
 const path = require('path');
-const { readFileSync, writeFileSync, copyFileSync, unlinkSync } = require('fs');
+const { readFileSync, writeFileSync, copyFileSync, unlinkSync, existsSync } = require('fs');
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -18,17 +18,22 @@ function activate(context) {
 	const opacity = config.get('opacity');
 	const videoName = config.get('videoName');
 
+	// 获取vscode js目录
 	const workbenchDirPath = path.join(path.dirname((require.main).filename), 'vs', 'code', 'electron-sandbox', 'workbench');
 	const workbenchFilePath = path.join(workbenchDirPath, 'workbench.js');
 
 	const jsPath = path.resolve(context.extensionPath, 'resources/main.js');
-	const video1Path = path.resolve(context.extensionPath, 'resources/video1.mp4');
-	const video2Path = path.resolve(context.extensionPath, 'resources/video2.mp4');
 	function setContent(opacity = 0.4, videoName = 'video1.mp4') {
 		let jsCode = readFileSync(jsPath, 'utf8').toString();
 
 		jsCode = jsCode.replace('{opacity}', opacity ? +opacity : 0.4);
-		jsCode = jsCode.replace('{videoName}', videoName);
+
+		if (videoName === '随机') {
+			const random = Math.floor(Math.random() * 6) + 1;
+			jsCode = jsCode.replace('{videoName}', `video${random}.mp4`);
+		} else {
+			jsCode = jsCode.replace('{videoName}', videoName);
+		}
 
 		let workbenchCode = readFileSync(workbenchFilePath, 'utf8').toString();
 
@@ -37,13 +42,18 @@ function activate(context) {
 		workbenchCode = workbenchCode.replace(re, '');
 		workbenchCode = workbenchCode.replace(/\s*$/, '');
 
-
 		writeFileSync(workbenchFilePath, `${workbenchCode} 
 /*background-video-start*/
 ${jsCode} 
 /*background-video-end*/`);
-		copyFileSync(video1Path, path.join(workbenchDirPath, 'video1.mp4'));
-		copyFileSync(video2Path, path.join(workbenchDirPath, 'video2.mp4'));
+
+		for (let i = 1; i <= 6; i += 1) {
+			if (!existsSync(path.join(workbenchDirPath, `video${i}.mp4`))) {
+				copyFileSync(
+					path.resolve(context.extensionPath, `resources/video${i}.mp4`), path.join(workbenchDirPath, `video${i}.mp4`)
+				);
+			}
+		}
 	}
 
 
@@ -71,14 +81,14 @@ ${jsCode}
 		writeFileSync(workbenchFilePath, workbenchCode);
 
 		// 删除视频文件
-		unlinkSync(path.join(workbenchDirPath, 'video1.mp4'));
-		unlinkSync(path.join(workbenchDirPath, 'video2.mp4'));
+		for (let i = 1; i <= 6; i += 1) {
+			if (existsSync(path.join(workbenchDirPath, `video${i}.mp4`))) {
+				unlinkSync(path.join(workbenchDirPath, `video${i}.mp4`));
+			}
+		}
 
 		vscode.window.showInformationMessage('内容删除成功, 可以卸载插件了。');
 	}));
-
-
-
 }
 
 // this method is called when your extension is deactivated
